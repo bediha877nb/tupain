@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>扫描数据看板</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        .header p {
+            opacity: 0.9;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-icon {
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+        .chart-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .chart-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .chart-card h3 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 18px;
+        }
+        .bar-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .bar-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .bar-label {
+            width: 80px;
+            font-size: 14px;
+            color: #666;
+            text-align: right;
+        }
+        .bar-track {
+            flex: 1;
+            height: 30px;
+            background: #f0f0f0;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+        .bar-fill {
+            height: 100%;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            transition: width 0.5s ease;
+        }
+        .bar-value {
+            width: 40px;
+            text-align: left;
+            font-size: 14px;
+            color: #333;
+            font-weight: 600;
+        }
+        .records-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .records-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .records-header h3 {
+            color: #333;
+            font-size: 18px;
+        }
+        .btn-export {
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: transform 0.2s;
+        }
+        .btn-export:hover {
+            transform: translateY(-2px);
+        }
+        .records-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .records-table th,
+        .records-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        .records-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #666;
+            font-size: 14px;
+        }
+        .records-table td {
+            font-size: 14px;
+            color: #333;
+        }
+        .records-table tr:hover {
+            background: #f8f9fa;
+        }
+        .os-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .os-ios {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        .os-android {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+        .os-other {
+            background: #f5f5f5;
+            color: #666;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        .empty-state-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .records-table {
+                font-size: 12px;
+            }
+            .records-table th,
+            .records-table td {
+                padding: 8px;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 二维码扫描数据看板</h1>
+        <p>实时监控二维码扫描情况</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-value" id="totalScans">0</div>
+            <div class="stat-label">总扫描次数</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🤖</div>
+            <div class="stat-value" id="androidCount">0</div>
+            <div class="stat-label">Android用户</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🍎</div>
+            <div class="stat-value" id="iosCount">0</div>
+            <div class="stat-label">iOS用户</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📱</div>
+            <div class="stat-value" id="todayCount">0</div>
+            <div class="stat-label">今日扫描</div>
+        </div>
+    </div>
+
+    <div class="chart-section">
+        <div class="chart-card">
+            <h3>操作系统分布</h3>
+            <div class="bar-chart" id="osChart"></div>
+        </div>
+        <div class="chart-card">
+            <h3>设备类型分布</h3>
+            <div class="bar-chart" id="deviceChart"></div>
+        </div>
+    </div>
+
+    <div class="records-section">
+        <div class="records-header">
+            <h3>📋 详细记录</h3>
+            <button class="btn-export" onclick="exportData()">导出数据</button>
+        </div>
+        <div id="recordsContainer">
+            <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <p>暂无扫描记录</p>
+                <p style="font-size: 14px; margin-top: 10px;">扫描二维码后将自动记录到这里</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 获取记录数据
+        function getRecords() {
+            return JSON.parse(localStorage.getItem('qrScanRecords') || '[]');
+        }
+
+        // 获取操作系统样式类
+        function getOSClass(os) {
+            if (os === 'iOS') return 'os-ios';
+            if (os === 'Android') return 'os-android';
+            return 'os-other';
+        }
+
+        // 更新统计数据
+        function updateStats(records) {
+            document.getElementById('totalScans').textContent = records.length;
+            
+            const androidCount = records.filter(r => r.os === 'Android').length;
+            const iosCount = records.filter(r => r.os === 'iOS').length;
+            document.getElementById('androidCount').textContent = androidCount;
+            document.getElementById('iosCount').textContent = iosCount;
+
+            const today = new Date().toDateString();
+            const todayCount = records.filter(r => new Date(r.timestamp).toDateString() === today).length;
+            document.getElementById('todayCount').textContent = todayCount;
+        }
+
+        // 生成图表
+        function generateChart(containerId, data) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            const maxValue = Math.max(...Object.values(data));
+            const colors = ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe'];
+            
+            Object.entries(data).forEach(([label, value], index) => {
+                const percentage = maxValue > 0 ? (value / maxValue * 100) : 0;
+                const color = colors[index % colors.length];
+                
+                const barItem = document.createElement('div');
+                barItem.className = 'bar-item';
+                barItem.innerHTML = `
+                    <span class="bar-label">${label}</span>
+                    <div class="bar-track">
+                        <div class="bar-fill" style="width: ${percentage}%; background: ${color};">
+                            ${value > 0 ? value : ''}
+                        </div>
+                    </div>
+                    <span class="bar-value">${value}</span>
+                `;
+                container.appendChild(barItem);
+            });
+        }
+
+        // 更新图表
+        function updateCharts(records) {
+            // 操作系统分布
+            const osData = {};
+            records.forEach(r => {
+                osData[r.os] = (osData[r.os] || 0) + 1;
+            });
+            generateChart('osChart', osData);
+
+            // 设备类型分布
+            const deviceData = {};
+            records.forEach(r => {
+                deviceData[r.device] = (deviceData[r.device] || 0) + 1;
+            });
+            generateChart('deviceChart', deviceData);
+        }
+
+        // 更新记录表格
+        function updateRecordsTable(records) {
+            const container = document.getElementById('recordsContainer');
+            
+            if (records.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>暂无扫描记录</p>
+                        <p style="font-size: 14px; margin-top: 10px;">扫描二维码后将自动记录到这里</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const tableHTML = `
+                <table class="records-table">
+                    <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>操作系统</th>
+                            <th>设备类型</th>
+                            <th>浏览器</th>
+                            <th>IP地址</th>
+                            <th>访问时间</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${records.map((record, index) => `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td><span class="os-badge ${getOSClass(record.os)}">${record.os}</span></td>
+                                <td>${record.device}</td>
+                                <td>${record.browser}</td>
+                                <td>${record.ip}</td>
+                                <td>${record.time}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            container.innerHTML = tableHTML;
+        }
+
+        // 导出数据
+        function exportData() {
+            const records = getRecords();
+            if (records.length === 0) {
+                alert('暂无数据可导出');
+                return;
+            }
+
+            const csvContent = [
+                ['序号', '操作系统', '设备类型', '浏览器', 'IP地址', '访问时间', 'UserAgent'],
+                ...records.map((r, i) => [i + 1, r.os, r.device, r.browser, r.ip, r.time, r.userAgent])
+            ].map(row => row.join(',')).join('\n');
+
+            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `二维码扫描记录_${new Date().toLocaleDateString('zh-CN')}.csv`;
+            link.click();
+        }
+
+        // 初始化
+        function init() {
+            const records = getRecords();
+            updateStats(records);
+            updateCharts(records);
+            updateRecordsTable(records);
+        }
+
+        // 页面加载时初始化
+        init();
+
+        // 定时刷新（每5秒）
+        setInterval(init, 5000);
+    </script>
+</body>
+</html>
