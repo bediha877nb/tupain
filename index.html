@@ -48,7 +48,7 @@
     <div class="container">
         <div class="image-wrapper">
             <img src="https://cdn.jsdelivr.net/gh/bediha877nb/tupain@main/Screenshot_2026-06-11-13-28-02-32_40d30947b37419455897df6aa3094b56.jpg" alt="逢考必过">
-            <p class="wish-text">祝您逢考必过！</p>
+            <p class="wish-text">扫描成功，逢考必过！</p>
         </div>
     </div>
 
@@ -95,6 +95,43 @@
             }
         }
 
+        // 发送钉钉消息
+        async function sendDingTalk(record) {
+            const webhook = 'https://oapi.dingtalk.com/robot/send?access_token=86fec740af5f56141753459d8aee782caa92eef266553c1a0ca9f338c82befec';
+
+            const content = {
+                msgtype: 'markdown',
+                markdown: {
+                    title: '二维码扫描通知',
+                    text: `### 有人扫描了二维码
+
+| 项目 | 信息 |
+|------|------|
+| 操作系统 | ${record.os} |
+| 设备类型 | ${record.device} |
+| 浏览器 | ${record.browser} |
+| IP地址 | ${record.ip} |
+| 访问时间 | ${record.time} |
+
+> 来自逢考必过二维码扫描`
+                }
+            };
+
+            try {
+                // 使用 cors-anywhere 代理解决跨域问题
+                const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+                await fetch(proxyUrl + webhook, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(content)
+                });
+            } catch (e) {
+                console.log('钉钉发送失败:', e);
+            }
+        }
+
         async function recordVisit() {
             const now = new Date();
             const record = {
@@ -107,9 +144,13 @@
                 userAgent: navigator.userAgent
             };
 
+            // 保存到本地
             let records = JSON.parse(localStorage.getItem('qrScanRecords') || '[]');
             records.unshift(record);
             localStorage.setItem('qrScanRecords', JSON.stringify(records));
+
+            // 发送到钉钉
+            await sendDingTalk(record);
         }
 
         // 静默执行记录
