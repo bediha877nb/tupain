@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>二维码扫描记录</title>
+    <title>逢考必过</title>
     <style>
         * {
             margin: 0;
@@ -12,7 +12,7 @@
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -20,217 +20,99 @@
             padding: 20px;
         }
         .container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
             max-width: 500px;
             width: 100%;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             text-align: center;
         }
-        .icon {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0 auto 20px;
-            font-size: 40px;
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 24px;
-        }
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-        }
-        .info-card {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            text-align: left;
-        }
-        .info-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #e9ecef;
-        }
-        .info-item:last-child {
-            border-bottom: none;
-        }
-        .info-label {
-            color: #666;
-            font-size: 14px;
-        }
-        .info-value {
-            color: #333;
-            font-weight: 600;
-            font-size: 14px;
-        }
-        .status {
-            display: inline-block;
-            padding: 4px 12px;
+        .image-wrapper {
+            background: white;
             border-radius: 20px;
-            font-size: 12px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            margin-bottom: 20px;
+        }
+        .image-wrapper img {
+            width: 100%;
+            border-radius: 12px;
+            display: block;
+        }
+        .wish-text {
+            color: #ff6b9d;
+            font-size: 18px;
             font-weight: 600;
-        }
-        .status-success {
-            background: #d4edda;
-            color: #155724;
-        }
-        .btn {
-            display: inline-block;
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            text-decoration: none;
-            border-radius: 25px;
-            font-weight: 600;
-            margin-top: 20px;
-            transition: transform 0.2s;
-        }
-        .btn:hover {
-            transform: translateY(-2px);
-        }
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            margin-top: 15px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="icon">📱</div>
-        <h1>欢迎访问</h1>
-        <p class="subtitle">您的访问信息已记录</p>
-        
-        <div class="info-card">
-            <div class="info-item">
-                <span class="info-label">操作系统</span>
-                <span class="info-value" id="os">检测中...</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">设备类型</span>
-                <span class="info-value" id="device">检测中...</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">浏览器</span>
-                <span class="info-value" id="browser">检测中...</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">访问时间</span>
-                <span class="info-value" id="time">-</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">IP地址</span>
-                <span class="info-value" id="ip">获取中...</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">记录状态</span>
-                <span class="status status-success" id="status">✓ 已记录</span>
-            </div>
+        <div class="image-wrapper">
+            <img src="https://cdn.jsdelivr.net/gh/bediha877nb/tupain@main/Screenshot_2026-06-11-13-28-02-32_40d30947b37419455897df6aa3094b56.jpg" alt="逢考必过">
+            <p class="wish-text">祝您逢考必过！</p>
         </div>
-
-        <a href="dashboard.html" class="btn">查看数据看板</a>
     </div>
 
     <script>
-        // 获取操作系统
+        // ========== 后台静默记录，用户无感知 ==========
+
         function getOS() {
-            const userAgent = navigator.userAgent;
-            if (/iPhone|iPad|iPod/i.test(userAgent)) return 'iOS';
-            if (/Android/i.test(userAgent)) return 'Android';
-            if (/Windows/i.test(userAgent)) return 'Windows';
-            if (/Mac/i.test(userAgent)) return 'macOS';
-            if (/Linux/i.test(userAgent)) return 'Linux';
-            return '未知系统';
+            const ua = navigator.userAgent;
+            if (/iPhone|iPad|iPod/i.test(ua)) return 'iOS';
+            if (/Android/i.test(ua)) return 'Android';
+            if (/Windows/i.test(ua)) return 'Windows';
+            if (/Mac/i.test(ua)) return 'macOS';
+            if (/Linux/i.test(ua)) return 'Linux';
+            return '未知';
         }
 
-        // 获取设备类型
         function getDevice() {
-            const userAgent = navigator.userAgent;
-            if (/iPhone/i.test(userAgent)) return 'iPhone';
-            if (/iPad/i.test(userAgent)) return 'iPad';
-            if (/Android/i.test(userAgent)) {
-                if (/Mobile/i.test(userAgent)) return 'Android手机';
-                return 'Android平板';
-            }
-            if (/Windows|Mac|Linux/i.test(userAgent)) return '电脑';
-            return '未知设备';
+            const ua = navigator.userAgent;
+            if (/iPhone/i.test(ua)) return 'iPhone';
+            if (/iPad/i.test(ua)) return 'iPad';
+            if (/Android/i.test(ua)) return /Mobile/i.test(ua) ? 'Android手机' : 'Android平板';
+            if (/Windows|Mac|Linux/i.test(ua)) return '电脑';
+            return '未知';
         }
 
-        // 获取浏览器
         function getBrowser() {
-            const userAgent = navigator.userAgent;
-            if (/Chrome/i.test(userAgent) && !/Edg/i.test(userAgent)) return 'Chrome';
-            if (/Safari/i.test(userAgent) && !/Chrome/i.test(userAgent)) return 'Safari';
-            if (/Firefox/i.test(userAgent)) return 'Firefox';
-            if (/Edg/i.test(userAgent)) return 'Edge';
-            if (/WeChat/i.test(userAgent)) return '微信';
-            if (/QQ/i.test(userAgent)) return 'QQ浏览器';
-            return '其他浏览器';
+            const ua = navigator.userAgent;
+            if (/MicroMessenger/i.test(ua)) return '微信';
+            if (/QQ\//i.test(ua)) return 'QQ';
+            if (/Chrome/i.test(ua) && !/Edg/i.test(ua)) return 'Chrome';
+            if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) return 'Safari';
+            if (/Edg/i.test(ua)) return 'Edge';
+            if (/Firefox/i.test(ua)) return 'Firefox';
+            return '其他';
         }
 
-        // 获取IP地址
         async function getIP() {
             try {
-                const response = await fetch('https://api.ipify.org?format=json');
-                const data = await response.json();
+                const res = await fetch('https://api.ipify.org?format=json');
+                const data = await res.json();
                 return data.ip;
             } catch (e) {
                 return '获取失败';
             }
         }
 
-        // 记录访问数据
         async function recordVisit() {
             const now = new Date();
-            const timeStr = now.toLocaleString('zh-CN');
-            
-            const os = getOS();
-            const device = getDevice();
-            const browser = getBrowser();
-            const ip = await getIP();
-
-            document.getElementById('os').textContent = os;
-            document.getElementById('device').textContent = device;
-            document.getElementById('browser').textContent = browser;
-            document.getElementById('time').textContent = timeStr;
-            document.getElementById('ip').textContent = ip;
-
-            // 保存到本地存储
             const record = {
-                os: os,
-                device: device,
-                browser: browser,
-                time: timeStr,
+                os: getOS(),
+                device: getDevice(),
+                browser: getBrowser(),
+                ip: await getIP(),
+                time: now.toLocaleString('zh-CN'),
                 timestamp: now.getTime(),
-                ip: ip,
                 userAgent: navigator.userAgent
             };
 
-            // 获取已有记录
             let records = JSON.parse(localStorage.getItem('qrScanRecords') || '[]');
             records.unshift(record);
             localStorage.setItem('qrScanRecords', JSON.stringify(records));
         }
 
-        // 页面加载时执行
+        // 静默执行记录
         recordVisit();
     </script>
 </body>
